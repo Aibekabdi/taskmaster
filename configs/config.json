@@ -1,0 +1,14 @@
+{
+    "api": {
+        "host": "localhost",
+        "port": "8080"
+    },
+    "mongoDB": {
+        "username": "mongo",
+        "password": "qwerty",
+        "host": "localhost",
+        "port": "27017",
+        "dbName": "mongodb",
+        "authSource": "admin"
+    }
+}
