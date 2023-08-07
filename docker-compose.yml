@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+    command: air --build.cmd "go build -o bin/api cmd/main.go" --build.bin "./bin/api"
+    depends_on: 
+      - db
+  db:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodata:/data/db
+volumes:
+  mongodata:

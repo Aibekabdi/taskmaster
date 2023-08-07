@@ -4,9 +4,7 @@
         "port": "8080"
     },
     "mongoDB": {
-        "username": "mongo",
-        "password": "qwerty",
-        "host": "localhost",
+        "host": "db",
         "port": "27017",
         "dbName": "mongodb",
         "authSource": "admin"
