@@ -2,9 +2,15 @@ package repository
 
 import "go.mongodb.org/mongo-driver/mongo"
 
-type Repository struct {
+type Task interface {
 }
 
-func NewRepository(db *mongo.Client, dbname string) *Repository {
-	return &Repository{}
+type Repository struct {
+	Task
+}
+
+func NewRepository(c *mongo.Collection, dbname string) *Repository {
+	return &Repository{
+		Task: newTaskRepository(c),
+	}
 }

@@ -6,6 +6,7 @@
     "mongoDB": {
         "host": "db",
         "port": "27017",
-        "dbName": "mongodb"
+        "dbName": "mongodb",
+        "tasksdb": "tasksdb"
     }
 }

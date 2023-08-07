@@ -25,23 +25,25 @@ func main() {
 		log.Fatalf("failed to load configs: %s", err)
 	}
 
-	ctxForDB, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	// подключение в mongodb
+	ctxForDB, ctxForDBCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// Подключение в mongoDB
 	db, err := mongodb.NewMongoDB(conf.MongoDB, ctxForDB)
 	if err != nil {
 		log.Fatalf("failed to initialize mongo db: %s", err.Error())
 	}
-
+	collection := db.Database("core").Collection("tasks")
+	// Отключение от mongoDB
 	defer func() {
 		if err = db.Disconnect(ctxForDB); err != nil {
 			log.Fatal("can't close connection db, err:", err)
 		} else {
 			log.Println("db closed")
 		}
+		ctxForDBCancel()
 	}()
 
 	// Подготовка слоенную архитектуру
-	repo := repository.NewRepository(db, conf.MongoDB.DBName)
+	repo := repository.NewRepository(collection, conf.MongoDB.DBName)
 	service := service.NewService(repo)
 	handler := http.NewHandler(service)
 
