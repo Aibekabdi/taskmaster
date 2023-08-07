@@ -1,8 +1,15 @@
 package repository
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"taskmaster/internal/models"
+	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 type Task interface {
+	CreateTask(task models.InputTask, activeAt time.Time) (string, int, error)
+	GetTasks() ([]models.Task, error)
 }
 
 type Repository struct {

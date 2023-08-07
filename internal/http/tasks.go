@@ -10,14 +10,22 @@ import (
 
 func (h *Handler) createTask(c *gin.Context) {
 	var (
-		task models.Task
+		task models.InputTask
 		err  error
 	)
 	if err = c.BindJSON(&task); err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	log.Println(task)
+
+	id, httpStatus, err := h.service.CreateTask(task)
+	if err != nil {
+		errorResponse(c, httpStatus, err.Error())
+		return
+	}
+
+	// Возвращаем ID созданной задачи
+	c.JSON(http.StatusCreated, gin.H{"task_id": id})
 }
 
 func (h *Handler) updateTask(c *gin.Context) {
@@ -33,5 +41,11 @@ func (h *Handler) markTaskAsDone(c *gin.Context) {
 }
 
 func (h *Handler) getTasks(c *gin.Context) {
-
+	tasks, err := h.service.GetTasks()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(tasks)
+	c.JSON(http.StatusOK, tasks)
 }

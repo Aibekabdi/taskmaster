@@ -1,8 +1,13 @@
 package service
 
-import "taskmaster/internal/repository"
+import (
+	"taskmaster/internal/models"
+	"taskmaster/internal/repository"
+)
 
 type Task interface {
+	CreateTask(task models.InputTask) (string, int, error)
+	GetTasks() ([]models.Task, error)
 }
 
 type Service struct {
