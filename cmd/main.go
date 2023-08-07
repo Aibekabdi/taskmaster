@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("failed to load configs: %s", err)
 	}
 
-	ctxForDB := context.TODO()
+	ctxForDB, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	// подключение в mongodb
 	db, err := mongodb.NewMongoDB(conf.MongoDB, ctxForDB)
 	if err != nil {
@@ -41,7 +41,7 @@ func main() {
 	}()
 
 	// Подготовка слоенную архитектуру
-	repo := repository.NewRepository(db)
+	repo := repository.NewRepository(db, conf.MongoDB.DBName)
 	service := service.NewService(repo)
 	handler := http.NewHandler(service)
 

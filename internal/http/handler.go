@@ -16,6 +16,19 @@ func NewHandler(service *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-
+	api := router.Group("/api")
+	{
+		todolist := api.Group("/todo-list")
+		{
+			tasks := todolist.Group("/tasks")
+			{
+				tasks.POST("/", h.createTask)
+				tasks.PUT("/:id", h.updateTask)
+				tasks.DELETE("/:id", h.deleteTask)
+				tasks.PUT("/:id/done", h.markTaskAsDone)
+				tasks.GET("/", h.getTasks)
+			}
+		}
+	}
 	return router
 }

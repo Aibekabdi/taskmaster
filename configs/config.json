@@ -6,7 +6,6 @@
     "mongoDB": {
         "host": "db",
         "port": "27017",
-        "dbName": "mongodb",
-        "authSource": "admin"
+        "dbName": "mongodb"
     }
 }
