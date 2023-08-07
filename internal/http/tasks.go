@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log"
 	"net/http"
 	"taskmaster/internal/models"
 
@@ -14,7 +15,9 @@ func (h *Handler) createTask(c *gin.Context) {
 	)
 	if err = c.BindJSON(&task); err != nil {
 		errorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
+	log.Println(task)
 }
 
 func (h *Handler) updateTask(c *gin.Context) {

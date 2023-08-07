@@ -42,7 +42,7 @@ func main() {
 		ctxForDBCancel()
 	}()
 
-	// Подготовка слоенную архитектуру
+	// Подготовка слоенной архитектуры
 	repo := repository.NewRepository(collection, conf.MongoDB.DBName)
 	service := service.NewService(repo)
 	handler := http.NewHandler(service)
