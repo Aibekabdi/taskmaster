@@ -21,14 +21,16 @@ func (s *TaskService) CreateTask(task models.InputTask) (string, int, error) {
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}
-	task.CreatedAt = time.Now()
-	if activeAt.Before(task.CreatedAt) {
+	createdAt := time.Now()
+	if activeAt.Before(createdAt) {
 		return "", http.StatusBadRequest, errors.New("invalid time")
 	}
-	task.Status = "active"
-	return s.taskRepo.CreateTask(task, activeAt)
+	return s.taskRepo.CreateTask(task, activeAt, createdAt)
 }
 
-func (s *TaskService) GetTasks() ([]models.Task, error) {
-	return s.taskRepo.GetTasks()
+func (s *TaskService) GetTasks(status string) ([]models.InputTask, error) {
+	if status == "" {
+		status = "active"
+	}
+	return s.taskRepo.GetTasks(status)
 }

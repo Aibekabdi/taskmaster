@@ -8,8 +8,8 @@ import (
 )
 
 type Task interface {
-	CreateTask(task models.InputTask, activeAt time.Time) (string, int, error)
-	GetTasks() ([]models.Task, error)
+	CreateTask(task models.InputTask, activeAt time.Time, createdAt time.Time) (string, int, error)
+	GetTasks(status string) ([]models.InputTask, error)
 }
 
 type Repository struct {

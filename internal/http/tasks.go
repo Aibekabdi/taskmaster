@@ -41,11 +41,12 @@ func (h *Handler) markTaskAsDone(c *gin.Context) {
 }
 
 func (h *Handler) getTasks(c *gin.Context) {
-	tasks, err := h.service.GetTasks()
+	status := c.DefaultQuery("status", "active")
+
+	tasks, err := h.service.GetTasks(status)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	log.Println(tasks)
 	c.JSON(http.StatusOK, tasks)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"sort"
 	"taskmaster/internal/models"
 	"time"
 
@@ -20,7 +21,7 @@ func newTaskRepository(c *mongo.Collection) *TaskRepository {
 	return &TaskRepository{c: c}
 }
 
-func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time) (string, int, error) {
+func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time, createdAt time.Time) (string, int, error) {
 	filter := bson.M{"title": task.Title, "activeAt": activeAt}
 	err := d.c.FindOne(context.TODO(), filter).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
@@ -34,8 +35,8 @@ func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time) (
 		"_id":       primitive.NewObjectID(),
 		"title":     task.Title,
 		"activeAt":  activeAt,
-		"status":    task.Status,
-		"createdAt": task.CreatedAt,
+		"status":    "active",
+		"createdAt": createdAt,
 	})
 	if err != nil {
 		return "", http.StatusInternalServerError, err
@@ -43,30 +44,52 @@ func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time) (
 	return insertResult.InsertedID.(primitive.ObjectID).Hex(), 0, nil
 }
 
-func (r *TaskRepository) GetTasks() ([]models.Task, error) {
-	cur, err := r.c.Find(context.Background(), bson.D{})
+func (r *TaskRepository) GetTasks(status string) ([]models.InputTask, error) {
+	// Фильтруем задачи по статусу и активной дате
+	filter := bson.M{"status": status}
+	if status == "active" {
+		filter["activeAt"] = bson.M{"$lte": time.Now()}
+	}
+
+	cur, err := r.c.Find(context.Background(), filter)
 	if err != nil {
-		// Если произошла ошибка, отправляем ответ со статусом 500
 		return nil, err
 	}
 	defer cur.Close(context.Background())
 
-	// Слайс для хранения задач
 	var tasks []models.Task
 
 	// Проходим по всем задачам
 	for cur.Next(context.Background()) {
-		// Создаем новую задачу
 		var task models.Task
 
-		// Декодируем задачу
 		err := cur.Decode(&task)
 		if err != nil {
 			return nil, err
 		}
 
-		// Добавляем задачу в слайс
+		// Проверяем, является ли день активации выходным
+		if task.ActiveAt.Weekday() == time.Saturday || task.ActiveAt.Weekday() == time.Sunday {
+			task.Title = "ВЫХОДНОЙ - " + task.Title
+		}
+
 		tasks = append(tasks, task)
 	}
-	return tasks, nil
+
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	// Сортируем задачи по дате создания
+	sort.Slice(tasks, func(i, j int) bool {
+		return tasks[i].CreatedAt.Before(tasks[j].CreatedAt)
+	})
+	var res []models.InputTask
+	for _, tasks := range tasks {
+		res = append(res, models.InputTask{
+			Title:    tasks.Title,
+			ActiveAt: tasks.ActiveAt.Format("2006-01-02"),
+		})
+	}
+	return res, nil
 }

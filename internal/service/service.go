@@ -7,7 +7,7 @@ import (
 
 type Task interface {
 	CreateTask(task models.InputTask) (string, int, error)
-	GetTasks() ([]models.Task, error)
+	GetTasks(status string) ([]models.InputTask, error)
 }
 
 type Service struct {
