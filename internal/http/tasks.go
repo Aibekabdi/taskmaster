@@ -44,7 +44,7 @@ func (h *Handler) deleteTask(c *gin.Context) {
 
 func (h *Handler) markTaskAsDone(c *gin.Context) {
 	id := c.Param("id")
-	status, err := h.service.MarkTaskDone(c.Request.Context(), id)
+	status, err := h.service.MarkTaskAsDone(c.Request.Context(), id)
 	if err != nil {
 		errorResponse(c, status, err.Error())
 		return

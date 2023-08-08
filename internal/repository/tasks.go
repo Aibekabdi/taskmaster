@@ -109,7 +109,7 @@ func (r *TaskRepository) DeleteTask(ctx context.Context, id string) (int, error)
 	return http.StatusNoContent, nil
 }
 
-func (r *TaskRepository) MarkTaskDone(ctx context.Context, id string) (int, error) {
+func (r *TaskRepository) MarkTaskAsDone(ctx context.Context, id string) (int, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return http.StatusNotFound, nil

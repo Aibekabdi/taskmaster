@@ -51,12 +51,12 @@ func (s *TaskService) DeleteTask(ctx context.Context, id string) (int, error) {
 	return s.taskRepo.DeleteTask(ctx, id)
 }
 
-func (s *TaskService) MarkTaskDone(ctx context.Context, id string) (int, error) {
+func (s *TaskService) MarkTaskAsDone(ctx context.Context, id string) (int, error) {
 	text := strings.TrimFunc(id, func(r rune) bool {
 		return unicode.IsSpace(r)
 	})
 	if text == "" {
 		return http.StatusBadRequest, errors.New("invalid id")
 	}
-	return s.taskRepo.MarkTaskDone(ctx, id)
+	return s.taskRepo.MarkTaskAsDone(ctx, id)
 }
