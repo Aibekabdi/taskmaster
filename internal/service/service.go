@@ -1,13 +1,15 @@
 package service
 
 import (
+	"context"
 	"taskmaster/internal/models"
 	"taskmaster/internal/repository"
 )
 
 type Task interface {
-	CreateTask(task models.InputTask) (string, int, error)
-	GetTasks(status string) ([]models.InputTask, error)
+	CreateTask(ctx context.Context, task models.InputTask) (string, int, error)
+	DeleteTask(ctx context.Context, id string) (int, error)
+	GetTasks(ctx context.Context, status string) ([]models.InputTask, error)
 }
 
 type Service struct {

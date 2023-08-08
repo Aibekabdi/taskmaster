@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"taskmaster/internal/models"
@@ -16,7 +17,7 @@ func newTaskService(taskRepo repository.Task) *TaskService {
 	return &TaskService{taskRepo: taskRepo}
 }
 
-func (s *TaskService) CreateTask(task models.InputTask) (string, int, error) {
+func (s *TaskService) CreateTask(ctx context.Context, task models.InputTask) (string, int, error) {
 	activeAt, err := time.Parse("2006-01-02", task.ActiveAt)
 	if err != nil {
 		return "", http.StatusBadRequest, err
@@ -25,12 +26,16 @@ func (s *TaskService) CreateTask(task models.InputTask) (string, int, error) {
 	if activeAt.Before(createdAt) {
 		return "", http.StatusBadRequest, errors.New("invalid time")
 	}
-	return s.taskRepo.CreateTask(task, activeAt, createdAt)
+	return s.taskRepo.CreateTask(ctx, task, activeAt, createdAt)
 }
 
-func (s *TaskService) GetTasks(status string) ([]models.InputTask, error) {
+func (s *TaskService) GetTasks(ctx context.Context, status string) ([]models.InputTask, error) {
 	if status == "" {
 		status = "active"
 	}
-	return s.taskRepo.GetTasks(status)
+	return s.taskRepo.GetTasks(ctx, status)
+}
+
+func (s *TaskService) DeleteTask(ctx context.Context, id string) (int, error) {
+	return s.taskRepo.DeleteTask(ctx, id)
 }

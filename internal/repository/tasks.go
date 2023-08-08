@@ -21,9 +21,9 @@ func newTaskRepository(c *mongo.Collection) *TaskRepository {
 	return &TaskRepository{c: c}
 }
 
-func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time, createdAt time.Time) (string, int, error) {
+func (d *TaskRepository) CreateTask(ctx context.Context, task models.InputTask, activeAt time.Time, createdAt time.Time) (string, int, error) {
 	filter := bson.M{"title": task.Title, "activeAt": activeAt}
-	err := d.c.FindOne(context.TODO(), filter).Err()
+	err := d.c.FindOne(ctx, filter).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		return "", http.StatusInternalServerError, err
 	}
@@ -31,7 +31,7 @@ func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time, c
 		return "", http.StatusBadRequest, errors.New("Error occurred while checking task uniqueness")
 	}
 
-	insertResult, err := d.c.InsertOne(context.TODO(), bson.M{
+	insertResult, err := d.c.InsertOne(ctx, bson.M{
 		"_id":       primitive.NewObjectID(),
 		"title":     task.Title,
 		"activeAt":  activeAt,
@@ -44,23 +44,23 @@ func (d *TaskRepository) CreateTask(task models.InputTask, activeAt time.Time, c
 	return insertResult.InsertedID.(primitive.ObjectID).Hex(), 0, nil
 }
 
-func (r *TaskRepository) GetTasks(status string) ([]models.InputTask, error) {
+func (r *TaskRepository) GetTasks(ctx context.Context, status string) ([]models.InputTask, error) {
 	// Фильтруем задачи по статусу и активной дате
 	filter := bson.M{"status": status}
 	if status == "active" {
 		filter["activeAt"] = bson.M{"$lte": time.Now()}
 	}
 
-	cur, err := r.c.Find(context.Background(), filter)
+	cur, err := r.c.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(context.Background())
+	defer cur.Close(ctx)
 
 	var tasks []models.Task
 
 	// Проходим по всем задачам
-	for cur.Next(context.Background()) {
+	for cur.Next(ctx) {
 		var task models.Task
 
 		err := cur.Decode(&task)
@@ -92,4 +92,19 @@ func (r *TaskRepository) GetTasks(status string) ([]models.InputTask, error) {
 		})
 	}
 	return res, nil
+}
+
+func (r *TaskRepository) DeleteTask(ctx context.Context, id string) (int, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return http.StatusNotFound, nil
+	}
+	res, err := r.c.DeleteOne(ctx, bson.M{"_id": objectID})
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if res.DeletedCount == 0 {
+		return http.StatusNotFound, nil
+	}
+	return http.StatusNoContent, nil
 }
