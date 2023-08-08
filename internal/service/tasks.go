@@ -20,13 +20,12 @@ func newTaskService(taskRepo repository.Task) *TaskService {
 }
 
 func (s *TaskService) CreateTask(ctx context.Context, task models.InputTask) (string, int, error) {
-	text := strings.TrimFunc(task.Title, func(r rune) bool {
-		return unicode.IsSpace(r)
-	})
-	if len(text) <= 0 || len(text) > 200 {
+	var ok bool
+	task.Title, ok = trimValidator(task.Title)
+	if !ok {
 		return "", http.StatusBadRequest, errors.New("invalid title")
 	}
-	task.Title = text
+
 	activeAt, err := time.Parse("2006-01-02", task.ActiveAt)
 	if err != nil {
 		return "", http.StatusBadRequest, err
@@ -49,39 +48,45 @@ func (s *TaskService) GetTasks(ctx context.Context, status string) ([]models.Inp
 }
 
 func (s *TaskService) DeleteTask(ctx context.Context, id string) (int, error) {
-	text := strings.TrimFunc(id, func(r rune) bool {
-		return unicode.IsSpace(r)
-	})
-	if text == "" {
-		return http.StatusBadRequest, errors.New("invalid id")
+	id, ok := trimValidator(id)
+	if !ok {
+		return http.StatusBadRequest, errors.New("invalid title")
 	}
 	return s.taskRepo.DeleteTask(ctx, id)
 }
 
 func (s *TaskService) MarkTaskAsDone(ctx context.Context, id string) (int, error) {
-	text := strings.TrimFunc(id, func(r rune) bool {
-		return unicode.IsSpace(r)
-	})
-	if text == "" {
-		return http.StatusBadRequest, errors.New("invalid id")
+	id, ok := trimValidator(id)
+	if !ok {
+		return http.StatusBadRequest, errors.New("invalid title")
 	}
 	return s.taskRepo.MarkTaskAsDone(ctx, id)
 }
 
 func (s *TaskService) UpdateTask(ctx context.Context, updatedInput models.InputTask, id string) (int, error) {
-	text := strings.TrimFunc(updatedInput.Title, func(r rune) bool {
-		return unicode.IsSpace(r)
-	})
-	if len(text) <= 0 || len(text) > 200 {
+	var ok bool
+	updatedInput.Title, ok = trimValidator(updatedInput.Title)
+	if !ok {
 		return http.StatusBadRequest, errors.New("invalid title")
 	}
-	text = strings.TrimFunc(id, func(r rune) bool {
-		return unicode.IsSpace(r)
-	})
-	updatedInput.Title = text
+	id, ok = trimValidator(id)
+	if !ok {
+		return http.StatusBadRequest, errors.New("invalid id")
+	}
 	activeAt, err := time.Parse("2006-01-02", updatedInput.ActiveAt)
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
 	return s.taskRepo.UpdateTask(ctx, updatedInput, id, activeAt)
+}
+
+// Убираем лишние пробелы, и проверяем на колличество символов
+func trimValidator(title string) (string, bool) {
+	text := strings.TrimFunc(title, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	if len(text) <= 0 || len(text) > 200 {
+		return "", false
+	}
+	return text, true
 }
