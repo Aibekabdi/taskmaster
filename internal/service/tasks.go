@@ -20,6 +20,13 @@ func newTaskService(taskRepo repository.Task) *TaskService {
 }
 
 func (s *TaskService) CreateTask(ctx context.Context, task models.InputTask) (string, int, error) {
+	text := strings.TrimFunc(task.Title, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	if len(text) <= 0 || len(text) > 200 {
+		return "", http.StatusBadRequest, errors.New("invalid title")
+	}
+	task.Title = text
 	activeAt, err := time.Parse("2006-01-02", task.ActiveAt)
 	if err != nil {
 		return "", http.StatusBadRequest, err
@@ -59,4 +66,22 @@ func (s *TaskService) MarkTaskAsDone(ctx context.Context, id string) (int, error
 		return http.StatusBadRequest, errors.New("invalid id")
 	}
 	return s.taskRepo.MarkTaskAsDone(ctx, id)
+}
+
+func (s *TaskService) UpdateTask(ctx context.Context, updatedInput models.InputTask, id string) (int, error) {
+	text := strings.TrimFunc(updatedInput.Title, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	if len(text) <= 0 || len(text) > 200 {
+		return http.StatusBadRequest, errors.New("invalid title")
+	}
+	text = strings.TrimFunc(id, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	updatedInput.Title = text
+	activeAt, err := time.Parse("2006-01-02", updatedInput.ActiveAt)
+	if err != nil {
+		return http.StatusBadRequest, err
+	}
+	return s.taskRepo.UpdateTask(ctx, updatedInput, id, activeAt)
 }

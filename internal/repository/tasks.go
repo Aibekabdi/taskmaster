@@ -112,7 +112,7 @@ func (r *TaskRepository) DeleteTask(ctx context.Context, id string) (int, error)
 func (r *TaskRepository) MarkTaskAsDone(ctx context.Context, id string) (int, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return http.StatusNotFound, nil
+		return http.StatusBadRequest, err
 	}
 	update := bson.M{"$set": bson.M{"status": "done"}}
 	res, err := r.c.UpdateOne(ctx, bson.M{"_id": objectID}, update)
@@ -122,5 +122,28 @@ func (r *TaskRepository) MarkTaskAsDone(ctx context.Context, id string) (int, er
 	if res.ModifiedCount == 0 {
 		return http.StatusNotFound, nil
 	}
+	return http.StatusNoContent, nil
+}
+
+func (r *TaskRepository) UpdateTask(ctx context.Context, updatedInput models.InputTask, id string, activeAt time.Time) (int, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return http.StatusBadRequest, err
+	}
+
+	update := bson.M{"$set": bson.M{
+		"title":    updatedInput.Title,
+		"activeAt": activeAt,
+	}}
+
+	res, err := r.c.UpdateOne(ctx, bson.M{"_id": objectID}, update)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	if res.ModifiedCount == 0 {
+		return http.StatusNotFound, nil
+	}
+
 	return http.StatusNoContent, nil
 }

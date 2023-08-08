@@ -11,6 +11,7 @@ type Task interface {
 	GetTasks(ctx context.Context, status string) ([]models.InputTask, error)
 	DeleteTask(ctx context.Context, id string) (int, error)
 	MarkTaskAsDone(ctx context.Context, id string) (int, error)
+	UpdateTask(ctx context.Context, updatedInput models.InputTask, id string,) (int, error) 
 }
 
 type Service struct {
