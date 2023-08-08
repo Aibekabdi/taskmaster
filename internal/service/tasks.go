@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"taskmaster/internal/models"
 	"taskmaster/internal/repository"
 	"time"
+	"unicode"
 )
 
 type TaskService struct {
@@ -30,12 +32,31 @@ func (s *TaskService) CreateTask(ctx context.Context, task models.InputTask) (st
 }
 
 func (s *TaskService) GetTasks(ctx context.Context, status string) ([]models.InputTask, error) {
-	if status == "" {
+	text := strings.TrimFunc(status, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	if text == "" {
 		status = "active"
 	}
 	return s.taskRepo.GetTasks(ctx, status)
 }
 
 func (s *TaskService) DeleteTask(ctx context.Context, id string) (int, error) {
+	text := strings.TrimFunc(id, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	if text == "" {
+		return http.StatusBadRequest, errors.New("invalid id")
+	}
 	return s.taskRepo.DeleteTask(ctx, id)
+}
+
+func (s *TaskService) MarkTaskDone(ctx context.Context, id string) (int, error) {
+	text := strings.TrimFunc(id, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+	if text == "" {
+		return http.StatusBadRequest, errors.New("invalid id")
+	}
+	return s.taskRepo.MarkTaskDone(ctx, id)
 }

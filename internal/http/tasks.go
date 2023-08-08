@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log"
 	"net/http"
 	"taskmaster/internal/models"
 
@@ -34,7 +33,6 @@ func (h *Handler) updateTask(c *gin.Context) {
 
 func (h *Handler) deleteTask(c *gin.Context) {
 	id := c.Param("id")
-	log.Println(id)
 	status, err := h.service.Task.DeleteTask(c.Request.Context(), id)
 	if err != nil {
 		errorResponse(c, status, err.Error())
@@ -45,7 +43,14 @@ func (h *Handler) deleteTask(c *gin.Context) {
 }
 
 func (h *Handler) markTaskAsDone(c *gin.Context) {
+	id := c.Param("id")
+	status, err := h.service.MarkTaskDone(c.Request.Context(), id)
+	if err != nil {
+		errorResponse(c, status, err.Error())
+		return
+	}
 
+	c.Status(status)
 }
 
 func (h *Handler) getTasks(c *gin.Context) {

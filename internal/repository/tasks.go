@@ -108,3 +108,19 @@ func (r *TaskRepository) DeleteTask(ctx context.Context, id string) (int, error)
 	}
 	return http.StatusNoContent, nil
 }
+
+func (r *TaskRepository) MarkTaskDone(ctx context.Context, id string) (int, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return http.StatusNotFound, nil
+	}
+	update := bson.M{"$set": bson.M{"status": "done"}}
+	res, err := r.c.UpdateOne(ctx, bson.M{"_id": objectID}, update)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if res.ModifiedCount == 0 {
+		return http.StatusNotFound, nil
+	}
+	return http.StatusNoContent, nil
+}
