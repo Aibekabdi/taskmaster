@@ -25,12 +25,13 @@ func (s *TaskService) CreateTask(ctx context.Context, task models.InputTask) (st
 	if !ok {
 		return "", http.StatusBadRequest, errors.New("invalid title")
 	}
-
+	// парсим время с стринга в time.Time
 	activeAt, err := time.Parse("2006-01-02", task.ActiveAt)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}
 	createdAt := time.Now()
+	// Проверяем является ли activeat раньше чем на данный момент
 	if activeAt.Before(createdAt) {
 		return "", http.StatusBadRequest, errors.New("invalid time")
 	}

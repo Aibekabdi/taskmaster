@@ -15,9 +15,10 @@ type (
 		Port string `json:"port"`
 	}
 	MongoDB struct {
-		Host   string `json:"host"`
-		Port   string `json:"port"`
-		DBName string `json:"dbName"`
+		Host    string `json:"host"`
+		Port    string `json:"port"`
+		DBName  string `json:"dbName"`
+		TasksDB string `json:"tasksdb"`
 	}
 )
 

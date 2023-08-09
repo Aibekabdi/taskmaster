@@ -1,0 +1,175 @@
+definitions:
+  http.errorResponseStruct:
+    properties:
+      msg:
+        type: string
+      status:
+        type: integer
+    type: object
+  models.InputTask:
+    properties:
+      activeAt:
+        type: string
+      title:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Документация по использованию данного микросервиса
+  title: TaskMaster
+  version: "1.0"
+paths:
+  /api/todo-list/tasks:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of tasks
+      parameters:
+      - description: Task status
+        enum:
+        - active
+        - done
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.InputTask'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+      summary: Get tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a new task
+      parameters:
+      - description: Task info
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.InputTask'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+      summary: Create task
+      tags:
+      - tasks
+  /api/todo-list/tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+      summary: Delete task
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Update task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: models.InputTask info
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.InputTask'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+      summary: Update task
+      tags:
+      - tasks
+  /api/todo-list/tasks/{id}/done:
+    put:
+      consumes:
+      - application/json
+      description: Mark a task as done by its ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponseStruct'
+      summary: Mark task as done
+      tags:
+      - tasks
+swagger: "2.0"

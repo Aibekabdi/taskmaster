@@ -16,6 +16,11 @@ import (
 	"time"
 )
 
+// @title TaskMaster
+// @version 1.0
+// @description Документация по использованию данного микросервиса
+
+// @host localhost:8080
 func main() {
 	// Основа микросервиса
 
@@ -31,7 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize mongo db: %s", err.Error())
 	}
-	collection := db.Database("core").Collection("tasks")
+	collection := db.Database("core").Collection(conf.MongoDB.TasksDB)
 	// Отключение от mongoDB
 	defer func() {
 		if err = db.Disconnect(ctxForDB); err != nil {

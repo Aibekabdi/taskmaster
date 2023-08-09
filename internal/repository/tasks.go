@@ -22,13 +22,18 @@ func newTaskRepository(c *mongo.Collection) *TaskRepository {
 }
 
 func (d *TaskRepository) CreateTask(ctx context.Context, task models.InputTask, activeAt time.Time, createdAt time.Time) (string, int, error) {
+	// Проверка есть ли такая задача или нет 
 	filter := bson.M{"title": task.Title, "activeAt": activeAt}
+
 	err := d.c.FindOne(ctx, filter).Err()
+
+	// Если появилась ошибка и она не означает (нет такого документа) то верни ошибку
 	if err != nil && err != mongo.ErrNoDocuments {
 		return "", http.StatusInternalServerError, err
 	}
+	// Если ошибка не равна "Нет такого документа" , значит есть такая задача
 	if err != mongo.ErrNoDocuments {
-		return "", http.StatusBadRequest, errors.New("Error occurred while checking task uniqueness")
+		return "", http.StatusBadRequest, errors.New("error occurred while checking task uniqueness")
 	}
 
 	insertResult, err := d.c.InsertOne(ctx, bson.M{
@@ -50,10 +55,11 @@ func (r *TaskRepository) GetTasks(ctx context.Context, status string) ([]models.
 	if status == "active" {
 		filter["activeAt"] = bson.M{"$lte": time.Now()}
 	}
-
+	
 	cur, err := r.c.Find(ctx, filter)
 	if err != nil {
 		return nil, err
+
 	}
 	defer cur.Close(ctx)
 

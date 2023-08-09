@@ -4,6 +4,9 @@ import (
 	"taskmaster/internal/service"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "taskmaster/docs"
 )
 
 type Handler struct {
@@ -16,6 +19,8 @@ func NewHandler(service *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	api := router.Group("/api")
 	{
 		todolist := api.Group("/todo-list")
