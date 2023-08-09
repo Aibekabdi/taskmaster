@@ -22,7 +22,7 @@ func newTaskRepository(c *mongo.Collection) *TaskRepository {
 }
 
 func (d *TaskRepository) CreateTask(ctx context.Context, task models.InputTask, activeAt time.Time, createdAt time.Time) (string, int, error) {
-	// Проверка есть ли такая задача или нет 
+	// Проверка есть ли такая задача или нет
 	filter := bson.M{"title": task.Title, "activeAt": activeAt}
 
 	err := d.c.FindOne(ctx, filter).Err()
@@ -55,7 +55,7 @@ func (r *TaskRepository) GetTasks(ctx context.Context, status string) ([]models.
 	if status == "active" {
 		filter["activeAt"] = bson.M{"$lte": time.Now()}
 	}
-	
+
 	cur, err := r.c.Find(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -137,12 +137,17 @@ func (r *TaskRepository) UpdateTask(ctx context.Context, updatedInput models.Inp
 		return http.StatusBadRequest, err
 	}
 
+	filter := bson.M{
+		"_id":       objectID,
+		"createdAt": bson.M{"$lt": activeAt},
+	}
+
 	update := bson.M{"$set": bson.M{
 		"title":    updatedInput.Title,
 		"activeAt": activeAt,
 	}}
 
-	res, err := r.c.UpdateOne(ctx, bson.M{"_id": objectID}, update)
+	res, err := r.c.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
