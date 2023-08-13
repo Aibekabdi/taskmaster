@@ -28,11 +28,12 @@ func (s *TaskService) CreateTask(ctx context.Context, task models.InputTask) (st
 	// парсим время с стринга в time.Time
 	activeAt, err := time.Parse("2006-01-02", task.ActiveAt)
 	if err != nil {
-		return "", http.StatusBadRequest, err
+		return "", http.StatusBadRequest, errors.New("invalid time")
 	}
 	createdAt := time.Now()
+	onlyDate := time.Date(createdAt.Year(), createdAt.Month(), createdAt.Day(), 0, 0, 0, 0, createdAt.Location())
 	// Проверяем является ли activeat раньше чем на данный момент
-	if activeAt.Before(createdAt) {
+	if activeAt.Before(onlyDate) {
 		return "", http.StatusBadRequest, errors.New("invalid time")
 	}
 	return s.taskRepo.CreateTask(ctx, task, activeAt, createdAt)
@@ -76,7 +77,7 @@ func (s *TaskService) UpdateTask(ctx context.Context, updatedInput models.InputT
 	}
 	activeAt, err := time.Parse("2006-01-02", updatedInput.ActiveAt)
 	if err != nil {
-		return http.StatusBadRequest, err
+		return http.StatusBadRequest, errors.New("invalid time")
 	}
 	return s.taskRepo.UpdateTask(ctx, updatedInput, id, activeAt)
 }

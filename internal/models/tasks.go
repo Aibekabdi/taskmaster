@@ -7,8 +7,8 @@ import (
 )
 
 type InputTask struct {
-	Title     string             `json:"title" bson:"title"`
-	ActiveAt  string             `json:"activeAt" bson:"activeAt"`
+	Title     string             `json:"title" bson:"title" binding:"required"`
+	ActiveAt  string             `json:"activeAt" bson:"activeAt" binding:"required"`
 }
 
 type Task struct {

@@ -5,7 +5,7 @@ import (
 	"taskmaster/internal/models"
 	"taskmaster/internal/repository"
 )
-
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
 type Task interface {
 	CreateTask(ctx context.Context, task models.InputTask) (string, int, error)
 	GetTasks(ctx context.Context, status string) ([]models.InputTask, error)

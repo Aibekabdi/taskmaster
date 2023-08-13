@@ -1,4 +1,5 @@
 compose-build:
+	go mod vendor
 	docker-compose build
 
 swagger:

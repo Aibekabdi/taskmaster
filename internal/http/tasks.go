@@ -22,7 +22,7 @@ func (h *Handler) createTask(c *gin.Context) {
 		err  error
 	)
 	if err = c.BindJSON(&task); err != nil {
-		ErrorResponse(c, http.StatusBadRequest, err.Error())
+		ErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -54,7 +54,7 @@ func (h *Handler) updateTask(c *gin.Context) {
 		err  error
 	)
 	if err = c.BindJSON(&task); err != nil {
-		ErrorResponse(c, http.StatusBadRequest, err.Error())
+		ErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 	httpStatus, err := h.service.UpdateTask(c.Request.Context(), task, id)
